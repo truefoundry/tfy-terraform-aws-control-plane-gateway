@@ -95,6 +95,10 @@ variable "tfy_api_key" {
 
 variable "truefoundry_image_pull_config_json" {
   type        = string
-  description = "Docker config JSON used to pull TrueFoundry images"
+  description = "Base64-encoded Docker config JSON used to pull TrueFoundry images (imagePullSecret from the installation packet)"
   sensitive   = true
+  validation {
+    condition     = can(jsondecode(base64decode(var.truefoundry_image_pull_config_json)))
+    error_message = "Pass the base64-encoded Docker config JSON (imagePullSecret from the installation packet), not the decoded JSON."
+  }
 }
