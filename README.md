@@ -27,7 +27,7 @@ It then installs Argo CD and the `tfy-k8s-aws-eks-inframold` chart. Inframold us
 - An ACM certificate, in the same region, covering the control plane hostname.
 - A VPC CIDR, three private subnet CIDRs (one per availability zone), and at least one public subnet CIDR.
 
-**From the [installation packet](https://www.truefoundry.com/docs/platform/deploy-control-plane-and-gateway-plane#installation-packet):** `tenantName`, `tfyApiKey` and `imagePullSecret`.
+**From the [installation packet](https://www.truefoundry.com/docs/platform/deploy-control-plane-and-gateway-plane#installation-packet):** `tenantName`, `tfyApiKey`, `licenseJwt` and `imagePullSecret`.
 
 ## Usage
 
@@ -71,6 +71,7 @@ Pass the secrets as environment variables, not in `terraform.tfvars`:
 
 ```bash
 export TF_VAR_tfy_api_key='<tfyApiKey from the installation packet>'
+export TF_VAR_truefoundry_license_jwt='<licenseJwt from the installation packet>'
 export TF_VAR_truefoundry_image_pull_config_json='<imagePullSecret from the installation packet>'
 ```
 

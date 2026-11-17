@@ -261,6 +261,7 @@ module "truefoundry" {
       "truefoundryBootstrap" = { "enabled" = true }
 
       "tfyApiKey"                      = var.tfy_api_key
+      "licenseJwt"                     = var.truefoundry_license_jwt
       "truefoundryImagePullConfigJSON" = var.truefoundry_image_pull_config_json
 
       "gateway" = { "enabled" = true }
