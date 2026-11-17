@@ -93,6 +93,12 @@ variable "tfy_api_key" {
   sensitive   = true
 }
 
+variable "truefoundry_license_jwt" {
+  type        = string
+  description = "TrueFoundry license JWT"
+  sensitive   = true
+}
+
 variable "truefoundry_image_pull_config_json" {
   type        = string
   description = "Docker config JSON used to pull TrueFoundry images"

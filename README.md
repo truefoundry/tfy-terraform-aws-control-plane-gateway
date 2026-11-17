@@ -27,10 +27,7 @@ It then installs Argo CD and the `tfy-k8s-aws-eks-inframold` chart. Inframold us
 - An ACM certificate, in the same region, covering the control plane hostname.
 - A VPC CIDR, three private subnet CIDRs (one per availability zone), and at least one public subnet CIDR.
 
-**From TrueFoundry:**
-
-- A TrueFoundry API key
-- The image pull config JSON
+**From the [installation packet](https://www.truefoundry.com/docs/platform/deploy-control-plane-and-gateway-plane#installation-packet):** `tenantName`, `tfyApiKey`, `licenseJwt` and `imagePullSecret`.
 
 ## Usage
 
@@ -53,7 +50,7 @@ Fill in `terraform.tfvars`:
 
 | Variable | Description |
 |---|---|
-| `tenant_name` | TrueFoundry tenant name |
+| `tenant_name` | `tenantName` from the installation packet |
 | `cluster_name` | EKS cluster name, also used as the resource prefix and load balancer name (32 characters or fewer) |
 | `aws_region` | AWS region |
 | `aws_profile` | AWS CLI profile |
@@ -73,9 +70,14 @@ Optional: `tags` (extra tags on all resources) and `argocd_chart_version` (defau
 Pass the secrets as environment variables, not in `terraform.tfvars`:
 
 ```bash
-export TF_VAR_tfy_api_key='<TrueFoundry API key>'
-export TF_VAR_truefoundry_image_pull_config_json="$(cat pull-config.json)"
+export TF_VAR_tfy_api_key='<tfyApiKey from the installation packet>'
+export TF_VAR_truefoundry_license_jwt='<licenseJwt from the installation packet>'
+export TF_VAR_truefoundry_image_pull_config_json='<imagePullSecret from the installation packet>'
 ```
+
+Terraform passes `licenseJwt` to inframold, and the TrueFoundry chart stores it in the `truefoundry-creds` secret as `LICENSE_JWT`.
+
+Use `imagePullSecret` exactly as it appears in the installation packet. It is already base64-encoded. A decoded JSON value creates an invalid image pull secret, and the TrueFoundry images fail to pull.
 
 ### 4. Install
 
@@ -98,10 +100,11 @@ aws eks update-kubeconfig --name <cluster_name> --region <aws_region>
 
 kubectl -n argocd get applications
 kubectl -n truefoundry get pods
+kubectl -n truefoundry describe secret truefoundry-creds
 kubectl top nodes
 ```
 
-All Argo CD applications should be `Synced` and `Healthy`, and the pods in `truefoundry` should be `Running`. `kubectl top nodes` returning numbers confirms metrics-server is working. The AI Gateway's autoscaling depends on it.
+All Argo CD applications should be `Synced` and `Healthy`, and the pods in `truefoundry` should be `Running`. The `Data` section of the `truefoundry-creds` secret should list `LICENSE_JWT`. `kubectl top nodes` returning numbers confirms metrics-server is working. The AI Gateway's autoscaling depends on it.
 
 ### 6. Point DNS at the load balancer
 
@@ -112,7 +115,7 @@ kubectl -n istio-system get svc tfy-istio-ingress \
   -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
 ```
 
-Create a DNS record (CNAME or alias) from the control plane hostname to this hostname. Then open `control_plane_url` in a browser. If `load_balancer_scheme` is `internal`, the hostname must resolve, and the load balancer must be reachable, from your network.
+Create a DNS record (CNAME or alias) from the control plane hostname to this hostname. Then open `control_plane_url` in a browser and log in with the `initialAdmin` credentials from the installation packet. If `load_balancer_scheme` is `internal`, the hostname must resolve, and the load balancer must be reachable, from your network.
 
 ## Outputs
 
