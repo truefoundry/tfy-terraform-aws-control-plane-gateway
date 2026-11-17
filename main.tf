@@ -15,6 +15,9 @@ provider "aws" {
 }
 
 locals {
+  use_existing_vpc   = var.vpc_id != null
+  availability_zones = local.use_existing_vpc ? distinct(data.aws_subnet.private[*].availability_zone) : var.availability_zones
+
   control_plane_host = trimsuffix(
     replace(var.control_plane_url, "/^https?:\\/\\//", ""), "/"
   )
@@ -58,6 +61,11 @@ data "aws_eks_cluster_auth" "cluster" {
   depends_on = [module.cluster]
 }
 
+data "aws_subnet" "private" {
+  count = local.use_existing_vpc ? length(var.private_subnets_ids) : 0
+  id    = var.private_subnets_ids[count.index]
+}
+
 module "network" {
   source  = "truefoundry/truefoundry-network/aws"
   version = "0.4.4"
@@ -66,8 +74,13 @@ module "network" {
   aws_region     = var.aws_region
   cluster_name   = var.cluster_name
 
+  shim                = local.use_existing_vpc
+  vpc_id              = var.vpc_id
+  private_subnets_ids = var.private_subnets_ids
+  public_subnets_ids  = var.public_subnets_ids
+
   vpc_cidr              = var.vpc_cidr
-  azs                   = var.availability_zones
+  azs                   = local.availability_zones
   private_subnets_cidrs = var.private_subnets_cidrs
   public_subnets_cidrs  = var.public_subnets_cidrs
 
@@ -222,7 +235,7 @@ module "truefoundry" {
         "clusterEndpoint"   = module.cluster.cluster_endpoint
         "instanceProfile"   = module.karpenter.karpenter_instance_profile_id
         "interruptionQueue" = module.karpenter.karpenter_sqs_name
-        "defaultZones"      = var.availability_zones
+        "defaultZones"      = local.availability_zones
       }
       "awsEbsCsiDriver" = {
         "enabled" = true
