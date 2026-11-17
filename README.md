@@ -75,6 +75,8 @@ export TF_VAR_truefoundry_license_jwt='<licenseJwt from the installation packet>
 export TF_VAR_truefoundry_image_pull_config_json='<imagePullSecret from the installation packet>'
 ```
 
+Terraform passes `licenseJwt` to inframold, and the TrueFoundry chart stores it in the `truefoundry-creds` secret as `LICENSE_JWT`.
+
 Use `imagePullSecret` exactly as it appears in the installation packet. It is already base64-encoded. A decoded JSON value creates an invalid image pull secret, and the TrueFoundry images fail to pull.
 
 ### 4. Install
@@ -98,10 +100,11 @@ aws eks update-kubeconfig --name <cluster_name> --region <aws_region>
 
 kubectl -n argocd get applications
 kubectl -n truefoundry get pods
+kubectl -n truefoundry describe secret truefoundry-creds
 kubectl top nodes
 ```
 
-All Argo CD applications should be `Synced` and `Healthy`, and the pods in `truefoundry` should be `Running`. `kubectl top nodes` returning numbers confirms metrics-server is working. The AI Gateway's autoscaling depends on it.
+All Argo CD applications should be `Synced` and `Healthy`, and the pods in `truefoundry` should be `Running`. The `Data` section of the `truefoundry-creds` secret should list `LICENSE_JWT`. `kubectl top nodes` returning numbers confirms metrics-server is working. The AI Gateway's autoscaling depends on it.
 
 ### 6. Point DNS at the load balancer
 
