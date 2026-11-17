@@ -272,6 +272,7 @@ module "truefoundry" {
       "enabled"              = true
       "devMode"              = { "enabled" = false }
       "truefoundryBootstrap" = { "enabled" = true }
+      "resourceTier"         = var.resource_tier
 
       "tfyApiKey"                      = var.tfy_api_key
       "licenseJwt"                     = var.truefoundry_license_jwt

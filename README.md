@@ -62,6 +62,7 @@ Fill in `terraform.tfvars`:
 | `control_plane_url` | `https://<hostname>` |
 | `acm_certificate_arn` | ACM certificate ARN covering the hostname |
 | `load_balancer_scheme` | `internet-facing` (default) or `internal` |
+| `resource_tier` | Size of the control plane and AI Gateway: `small` (development and testing), `medium` (default, small production workloads) or `large` (large production workloads) |
 
 Optional: `tags` (extra tags on all resources) and `argocd_chart_version` (default `10.10.5`).
 
@@ -137,6 +138,16 @@ kubectl -n istio-system get svc tfy-istio-ingress \
 ```
 
 Create a DNS record (CNAME or alias) from the control plane hostname to this hostname. Then open `control_plane_url` in a browser and log in with the `initialAdmin` credentials from the installation packet. If `load_balancer_scheme` is `internal`, the hostname must resolve, and the load balancer must be reachable, from your network.
+
+## Change the resource tier
+
+Terraform runs the inframold install only once. To change `resource_tier` later, update `terraform.tfvars` and run:
+
+```bash
+terraform apply -replace=module.truefoundry.null_resource.helm_install
+```
+
+This runs the inframold install again with the latest chart version, which can also upgrade TrueFoundry.
 
 ## Outputs
 

@@ -119,6 +119,16 @@ variable "load_balancer_scheme" {
   }
 }
 
+variable "resource_tier" {
+  type        = string
+  description = "Resource tier of the control plane and AI Gateway: small, medium or large"
+  default     = "medium"
+  validation {
+    condition     = contains(["small", "medium", "large"], var.resource_tier)
+    error_message = "resource_tier must be small, medium or large."
+  }
+}
+
 variable "argocd_chart_version" {
   type        = string
   description = "argo-cd Helm chart version"
