@@ -87,6 +87,26 @@ variable "argocd_chart_version" {
   default     = "10.10.5"
 }
 
+variable "database_engine" {
+  type        = string
+  description = "Engine of the control plane database: rds (Amazon RDS for PostgreSQL) or aurora (Amazon Aurora PostgreSQL)"
+  default     = "rds"
+  validation {
+    condition     = contains(["rds", "aurora"], var.database_engine)
+    error_message = "database_engine must be rds or aurora."
+  }
+}
+
+variable "database_instance_class" {
+  type        = string
+  description = "Instance class of the control plane database. Defaults to db.t3.medium for rds and db.r6g.large for aurora."
+  default     = null
+  validation {
+    condition     = var.database_instance_class == null || (startswith(coalesce(var.database_instance_class, "-"), "db.") && var.database_instance_class != "db.serverless")
+    error_message = "database_instance_class must be a DB instance class such as db.t3.medium. db.serverless is not supported."
+  }
+}
+
 variable "tfy_api_key" {
   type        = string
   description = "TrueFoundry API key"
