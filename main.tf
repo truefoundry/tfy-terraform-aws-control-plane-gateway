@@ -149,7 +149,7 @@ module "aws_load_balancer_controller" {
 
 module "tfy_control_plane" {
   source  = "truefoundry/truefoundry-control-plane/aws"
-  version = "0.5.3"
+  version = "0.6.0-rc.1"
 
   cluster_name            = var.cluster_name
   aws_account_id          = var.aws_account_id
@@ -159,6 +159,8 @@ module "tfy_control_plane" {
 
   truefoundry_db_ingress_security_group = module.cluster.node_security_group_id
   truefoundry_db_subnet_ids             = toset(module.network.private_subnets_id)
+  truefoundry_db_engine_mode            = var.database_engine
+  truefoundry_db_instance_class         = var.database_instance_class
 
   tags = var.tags
 }

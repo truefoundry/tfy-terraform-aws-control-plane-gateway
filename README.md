@@ -7,7 +7,7 @@ It creates:
 - A VPC with private and public subnets and a NAT gateway, unless you use an existing VPC
 - An EKS cluster with an initial node group and Karpenter
 - IAM roles for the EBS CSI driver and the AWS Load Balancer Controller
-- The control plane's RDS PostgreSQL database, S3 bucket and IAM role
+- The control plane's PostgreSQL database (Amazon RDS or Aurora), S3 bucket and IAM role
 
 It then installs Argo CD and the `tfy-k8s-aws-eks-inframold` chart. Inframold uses Argo CD to deploy Istio, Karpenter, the AWS Load Balancer Controller, the EBS CSI driver, metrics-server and TrueFoundry (control plane and AI Gateway).
 
@@ -59,6 +59,8 @@ Fill in `terraform.tfvars`:
 | `availability_zones` | Exactly three availability zones |
 | `private_subnets_cidrs` | Three private subnet CIDRs, one per availability zone |
 | `public_subnets_cidrs` | One or more public subnet CIDRs |
+| `database_engine` | `rds` (default) for Amazon RDS for PostgreSQL, or `aurora` for Amazon Aurora PostgreSQL. Set it before the first install. Changing it later replaces the database, and the existing data is not migrated. |
+| `database_instance_class` | Database instance class, for example `db.t3.medium` or `db.r6g.large`. Defaults to `db.t3.medium` for `rds` and `db.r6g.large` for `aurora`. |
 | `control_plane_url` | `https://<hostname>` |
 | `acm_certificate_arn` | ACM certificate ARN covering the hostname |
 | `load_balancer_scheme` | `internet-facing` (default) or `internal` |
@@ -156,4 +158,4 @@ This runs the inframold install again with the latest chart version, which can a
 | `vpc_id` | VPC ID |
 | `cluster_endpoint` | EKS API server endpoint |
 | `truefoundry_bucket` | S3 bucket used by the control plane |
-| `truefoundry_db_host` | RDS PostgreSQL hostname |
+| `truefoundry_db_host` | Database hostname (the cluster endpoint for Aurora) |
