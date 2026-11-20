@@ -12,3 +12,4 @@ public_subnets_cidrs  = ["<public-az-1>", "<public-az-2>", "<public-az-3>"]
 control_plane_url    = "https://<hostname>"
 acm_certificate_arn  = "<acm_certificate_arn>"
 load_balancer_scheme = "internet-facing"
+resource_tier        = "medium"
